@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Đặt hàng{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Đặt hàng</h1>
+<form method="post" class="row g-4">
+  <div class="col-lg-7">
+    <div class="panel mb-3">
+      <h2 class="h6">Thông tin nhận hàng</h2>
+      <div class="row g-2">
+        <div class="col-md-6"><label class="form-label small">Người nhận</label><input class="form-control" name="receiver_name" value="{{ g.user.full_name }}" required></div>
+        <div class="col-md-6"><label class="form-label small">Số điện thoại</label><input class="form-control" name="phone" value="{{ g.user.phone or '' }}"></div>
+        <div class="col-md-4"><label class="form-label small">Quận/huyện</label><select class="form-select" name="district">{% for d in DISTRICTS %}<option {{ 'selected' if d==g.user.district }}>{{ d }}</option>{% endfor %}</select></div>
+        <div class="col-md-8"><label class="form-label small">Địa chỉ giao hàng</label><input class="form-control" name="address" value="{{ g.user.address or '' }}"></div>
+        <div class="col-12"><label class="form-label small">Yêu cầu bổ sung</label><textarea class="form-control" name="note" rows="2" placeholder="Ví dụ: chọn cá còn sống, gọi trước khi giao…"></textarea></div>
+      </div>
+    </div>
+    <div class="panel mb-3">
+      <h2 class="h6">Hình thức giao hàng</h2>
+      {% for k, label, desc in [('instant','Giao ngay','Shipper gần nhất nhận chuyến riêng cho đơn của bạn. Phí cao hơn.'),('economy','Giao tiết kiệm','Gom đơn cùng khu vực để giao chung chuyến. Phí thấp hơn.'),('pickup','Tự đến lấy','Nhận trực tiếp tại gian hàng, không mất phí giao.')] %}
+      <div class="form-check mb-2"><input class="form-check-input ship" type="radio" name="delivery_type" id="d{{k}}" value="{{k}}" data-fee="{{ fees[k] }}" {{ 'checked' if k=='instant' }}>
+        <label class="form-check-label" for="d{{k}}"><strong>{{ label }}</strong> – {{ fees[k]|money }}/gian hàng<div class="small text-muted">{{ desc }}</div></label></div>{% endfor %}
+      <div id="win" class="mt-2 d-none"><label class="form-label small">Khung giờ nhận hàng (giao tiết kiệm)</label>
+        <select class="form-select" name="time_window">{% for w in TIME_WINDOWS %}<option>{{ w }}</option>{% endfor %}</select></div>
+    </div>
+    <div class="panel">
+      <h2 class="h6">Phương thức thanh toán</h2>
+      {% for k in ['cod','bank','wallet'] %}<div class="form-check"><input class="form-check-input" type="radio" name="payment_method" id="p{{k}}" value="{{k}}" {{ 'checked' if k=='cod' }}><label class="form-check-label" for="p{{k}}">{{ PAYMENT_LABEL[k] }}</label></div>{% endfor %}
+    </div>
+  </div>
+  <div class="col-lg-5"><div class="panel position-sticky" style="top:1rem">
+    <h2 class="h6">Đơn hàng của bạn</h2>
+    {% for it in items %}<div class="d-flex justify-content-between small py-1"><span>{{ it.product.emoji }} {{ it.product.name }} × {{ it.qty }}<br><span class="text-muted">{{ it.product.stall.name }}</span></span><span>{{ it.line|money }}</span></div>{% endfor %}
+    <hr>
+    <div class="d-flex justify-content-between"><span>Tạm tính</span><span>{{ total|money }}</span></div>
+    <div class="d-flex justify-content-between"><span>Phí giao ({{ n_stalls }} gian hàng)</span><span id="fee">{{ (fees['instant'] * n_stalls)|money }}</span></div>
+    <div class="d-flex justify-content-between fs-5 fw-bold mt-2"><span>Tổng cộng</span><span id="tot">{{ (total + fees['instant'] * n_stalls)|money }}</span></div>
+    <button class="btn btn-leaf w-100 mt-3">Xác nhận đặt hàng</button>
+  </div></div>
+</form>
+{% endblock %}
+{% block scripts %}<script>
+const base={{ total }}, n={{ n_stalls }};
+const fmt=v=>v.toLocaleString('vi-VN')+'đ';
+function upd(){const r=document.querySelector('.ship:checked');const fee=+r.dataset.fee*n;
+ document.getElementById('fee').textContent=fmt(fee);document.getElementById('tot').textContent=fmt(base+fee);
+ document.getElementById('win').classList.toggle('d-none',r.value!=='economy');}
+document.querySelectorAll('.ship').forEach(e=>e.addEventListener('change',upd));upd();
+</script>{% endblock %}

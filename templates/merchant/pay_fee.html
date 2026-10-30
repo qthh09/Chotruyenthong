@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Thanh toán phí gian hàng{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-6"><div class="panel">
+  <h1 class="h4">Thanh toán phí gian hàng</h1>
+  <p class="text-muted">Hồ sơ “{{ s.name }}” đã được xác thực. Phí tính theo nhóm ngành hàng và thời hạn.</p>
+  <table class="table"><tr><td>Nhóm ngành hàng</td><td class="text-end">{{ s.category.name }}</td></tr><tr><td>Phí cơ sở</td><td class="text-end">{{ s.category.fee_per_month|money }}/tháng</td></tr><tr><td>Thời hạn</td><td class="text-end">{{ s.months }} tháng</td></tr><tr class="fw-bold fs-5"><td>Phải thanh toán</td><td class="text-end">{{ s.fee|money }}</td></tr></table>
+  <form method="post"><button class="btn btn-leaf w-100">Thanh toán qua cổng (giả lập)</button></form>
+</div></div></div>
+{% endblock %}

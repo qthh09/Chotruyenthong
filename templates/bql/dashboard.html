@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Ban quản lý chợ{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Ban quản lý chợ</h1>
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="stat warn"><div class="n">{{ to_check|length }}</div><div class="l">Hồ sơ chờ kiểm tra</div></div></div>
+  <div class="col-md-4"><div class="stat"><div class="n">{{ to_approve|length }}</div><div class="l">Đã thanh toán – chờ phê duyệt</div></div></div>
+  <div class="col-md-4"><div class="stat"><div class="n">{{ batches|length }}</div><div class="l">Lô hàng chờ xác minh</div></div></div>
+</div>
+{% macro tbl(rows, label) %}
+<div class="panel p-0 mb-4 table-responsive"><div class="p-3 pb-0 fw-bold">{{ label }}</div><table class="table mb-0"><thead><tr><th>Gian hàng</th><th>Chợ</th><th>Ngành hàng</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+{% for s in rows %}<tr><td>{{ s.name }}<div class="small text-muted">{{ s.owner.full_name }}</div></td><td>{{ s.market.name }}</td><td>{{ s.category.name }}</td><td>{{ s.status|badge('stall') }}</td><td><a class="btn btn-sm btn-outline-dark" href="{{ url_for('bql.review', sid=s.id) }}">Mở hồ sơ</a></td></tr>
+{% else %}<tr><td colspan="5" class="text-muted text-center py-3">Không có hồ sơ.</td></tr>{% endfor %}</tbody></table></div>
+{% endmacro %}
+{{ tbl(to_check, 'Hồ sơ cần kiểm tra') }}
+{{ tbl(to_approve, 'Chờ phê duyệt đăng ký') }}
+<div class="panel p-0 mb-4 table-responsive"><div class="p-3 pb-0 fw-bold">Lô hàng chờ xác minh chứng từ</div><table class="table mb-0"><tbody>
+{% for b in batches %}<tr><td>{{ b.batch_code }}</td><td>{{ b.stall.name }}</td><td>{{ b.supplier.name }}</td><td class="small">{{ b.document }}</td>
+<td><form method="post" action="{{ url_for('bql.verify_batch', bid=b.id) }}"><button class="btn btn-sm btn-leaf">Xác minh</button></form></td></tr>{% else %}<tr><td class="text-muted text-center py-3">Không có lô hàng chờ.</td></tr>{% endfor %}</tbody></table></div>
+{{ tbl(others, 'Tất cả gian hàng đã xử lý') }}
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Sản phẩm – Chợ địa phương số{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Sản phẩm</h1>
+<form class="panel row g-2 align-items-end mb-4" method="get">
+  <div class="col-md-4"><label class="form-label small">Từ khoá</label><input class="form-control" name="q" value="{{ q }}" placeholder="Tên sản phẩm hoặc gian hàng"></div>
+  <div class="col-md-2"><label class="form-label small">Ngành hàng</label><select class="form-select" name="cat"><option value="">Tất cả</option>{% for c in cats %}<option value="{{ c.id }}" {{ 'selected' if cat==c.id }}>{{ c.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-3"><label class="form-label small">Chợ</label><select class="form-select" name="market"><option value="">Tất cả</option>{% for m in markets %}<option value="{{ m.id }}" {{ 'selected' if market==m.id }}>{{ m.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><label class="form-label small">Sắp xếp</label><select class="form-select" name="sort">
+    <option value="new" {{ 'selected' if sort=='new' }}>Mới nhất</option><option value="price_asc" {{ 'selected' if sort=='price_asc' }}>Giá tăng dần</option><option value="price_desc" {{ 'selected' if sort=='price_desc' }}>Giá giảm dần</option></select></div>
+  <div class="col-md-1"><button class="btn btn-leaf w-100">Lọc</button></div>
+</form>
+{% if pag.items %}
+<div class="row g-3">{% for p in pag.items %}<div class="col-6 col-md-4 col-lg-3">{% include "_card.html" %}</div>{% endfor %}</div>
+<nav class="mt-4 d-flex gap-2 justify-content-center align-items-center">
+  {% if pag.has_prev %}<a class="btn btn-outline-dark btn-sm" href="{{ url_for('shop.products', q=q, cat=cat, market=market, sort=sort, page=pag.prev_num) }}">Trang trước</a>{% endif %}
+  <span class="small text-muted">Trang {{ pag.page }} / {{ pag.pages }}</span>
+  {% if pag.has_next %}<a class="btn btn-outline-dark btn-sm" href="{{ url_for('shop.products', q=q, cat=cat, market=market, sort=sort, page=pag.next_num) }}">Trang sau</a>{% endif %}
+</nav>
+{% else %}<div class="panel text-center py-5">Không có sản phẩm phù hợp. Thử bỏ bớt bộ lọc hoặc đổi từ khoá.</div>{% endif %}
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Đăng ký{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-6"><div class="panel">
+  <h1 class="h4 mb-3">Tạo tài khoản</h1>
+  <form method="post" class="row g-3">
+    <div class="col-12"><label class="form-label">Bạn là</label>
+      <select class="form-select" name="role" id="role"><option value="customer">Khách hàng – mua sắm</option><option value="merchant">Người bán – mở gian hàng số</option><option value="shipper">Shipper địa phương</option></select></div>
+    <div class="col-md-6"><label class="form-label">Họ tên</label><input class="form-control" name="full_name" required></div>
+    <div class="col-md-6"><label class="form-label">Số điện thoại</label><input class="form-control" name="phone"></div>
+    <div class="col-md-6"><label class="form-label">Email</label><input class="form-control" type="email" name="email" required></div>
+    <div class="col-md-6"><label class="form-label">Mật khẩu (từ 6 ký tự)</label><input class="form-control" type="password" name="password" required minlength="6"></div>
+    <div class="col-md-6 ship-only d-none"><label class="form-label">Khu vực hoạt động</label><select class="form-select" name="district"><option value="">—</option>{% for d in DISTRICTS %}<option>{{ d }}</option>{% endfor %}</select></div>
+    <div class="col-md-6 ship-only d-none"><label class="form-label">Phương tiện</label><input class="form-control" name="vehicle" placeholder="Xe máy 29-A1 000.00"></div>
+    <div class="col-12"><button class="btn btn-leaf w-100">Đăng ký</button></div>
+  </form></div></div></div>
+{% endblock %}
+{% block scripts %}<script>
+const r=document.getElementById('role');r.addEventListener('change',()=>document.querySelectorAll('.ship-only').forEach(e=>e.classList.toggle('d-none',r.value!=='shipper')));
+</script>{% endblock %}

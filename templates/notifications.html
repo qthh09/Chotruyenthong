@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Thông báo{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Thông báo</h1>
+<div class="list-group">{% for n, was_read in items %}
+  <a class="list-group-item list-group-item-action {{ '' if was_read else 'unread' }}" href="{{ n.link or '#' }}"><div>{{ n.message }}</div><div class="small text-muted">{{ n.created_at|dt }}</div></a>
+{% else %}<div class="panel text-center">Chưa có thông báo nào.</div>{% endfor %}</div>
+{% endblock %}

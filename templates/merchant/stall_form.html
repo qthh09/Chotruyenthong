@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Đăng ký gian hàng số{% endblock %}
+{% block content %}
+<h1 class="h3">Đăng ký gian hàng số</h1>
+{% if s and s.bql_note %}<div class="alert alert-danger"><strong>Ban quản lý chợ yêu cầu bổ sung:</strong> {{ s.bql_note }}</div>{% endif %}
+<form method="post" enctype="multipart/form-data" class="panel row g-3">
+  <div class="col-md-6"><label class="form-label">Tên gian hàng</label><input class="form-control" name="name" value="{{ s.name if s else '' }}" required></div>
+  <div class="col-md-6"><label class="form-label">Mã số thuế / CCCD</label><input class="form-control" name="tax_code" value="{{ s.tax_code if s else '' }}"></div>
+  <div class="col-md-4"><label class="form-label">Chợ đăng ký</label><select class="form-select" name="market_id" required>{% for m in markets %}<option value="{{ m.id }}" {{ 'selected' if s and s.market_id==m.id }}>{{ m.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-4"><label class="form-label">Nhóm ngành hàng</label><select class="form-select" name="category_id" required>{% for c in cats %}<option value="{{ c.id }}" {{ 'selected' if s and s.category_id==c.id }}>{{ c.emoji }} {{ c.name }} ({{ c.fee_per_month|money }}/tháng)</option>{% endfor %}</select></div>
+  <div class="col-md-4"><label class="form-label">Thời hạn gian hàng</label><select class="form-select" name="months">{% for m, t in [(3,'3 tháng'),(6,'6 tháng (giảm 5%)'),(12,'12 tháng (giảm 10%)')] %}<option value="{{ m }}" {{ 'selected' if s and s.months==m }}>{{ t }}</option>{% endfor %}</select></div>
+  <div class="col-12"><label class="form-label">Địa điểm kinh doanh (vị trí ô/sạp)</label><input class="form-control" name="address" value="{{ s.address if s else '' }}"></div>
+  <div class="col-12"><label class="form-label">Giới thiệu gian hàng</label><textarea class="form-control" name="description" rows="3">{{ s.description if s else '' }}</textarea></div>
+  <div class="col-12"><label class="form-label">Giấy tờ, hình ảnh minh chứng (PNG, JPG, PDF – chọn nhiều tệp)</label><input class="form-control" type="file" name="docs" multiple accept=".png,.jpg,.jpeg,.pdf">
+    {% if s and s.docs %}<div class="small text-muted mt-1">Đã tải: {{ s.docs.split(',')|length }} tệp. Tải thêm nếu được yêu cầu bổ sung.</div>{% endif %}</div>
+  <div class="col-12"><button class="btn btn-leaf">Gửi hồ sơ cho Ban quản lý chợ</button></div>
+</form>
+{% endblock %}

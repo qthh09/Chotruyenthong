@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Đơn của tôi{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Đơn của tôi</h1>
+{% if items %}<div class="panel p-0"><table class="table mb-0"><thead><tr><th>Mã đơn</th><th>Ngày đặt</th><th>Giao hàng</th><th>Tổng</th><th>Thanh toán</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+{% for o in items %}<tr><td class="fw-medium">{{ o.code }}</td><td>{{ o.created_at|dt }}</td><td>{{ DELIVERY_LABEL[o.delivery_type] }}</td><td>{{ o.total|money }}</td>
+<td>{{ o.payment_status|badge('pay') }}</td><td>{{ o.status|badge('order') }}</td><td><a class="btn btn-sm btn-outline-dark" href="{{ url_for('shop.order_detail', oid=o.id) }}">Xem</a></td></tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="panel text-center py-5">Bạn chưa có đơn hàng nào. <a href="{{ url_for('shop.products') }}">Bắt đầu mua sắm</a>.</div>{% endif %}
+{% endblock %}

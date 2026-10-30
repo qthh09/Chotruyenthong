@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Điều phối giao hàng{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Điều phối giao hàng</h1>
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3"><div class="stat warn"><div class="n">{{ instant|length }}</div><div class="l">Giao ngay chờ shipper</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat warn"><div class="n">{{ groups.values()|map('length')|sum }}</div><div class="l">Đơn tiết kiệm chờ gom</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat"><div class="n">{{ recent_active|length }}</div><div class="l">Đơn đang vận chuyển</div></div></div>
+  <div class="col-6 col-lg-3"><div class="stat bad"><div class="n">{{ cod|length }}</div><div class="l">COD chờ đối soát</div></div></div>
+</div>
+
+<div class="panel mb-4"><h2 class="h5">Luồng giao ngay (đơn lẻ)</h2>
+<table class="table mb-0"><thead><tr><th>Đơn</th><th>Lấy hàng tại</th><th>Giao tới</th><th>Phí</th><th style="width:360px">Tìm shipper</th></tr></thead><tbody>
+{% for r in instant %}<tr><td>{{ r.suborder.code }}</td><td>{{ r.suborder.stall.name }}<div class="small text-muted">{{ r.suborder.stall.market.district }}</div></td><td>{{ r.suborder.order.address }}, {{ r.district }}</td><td>{{ r.fee|money }}</td>
+<td><form class="d-flex gap-1" method="post" action="{{ url_for('ops.assign_instant', rid=r.id) }}">
+  <select class="form-select form-select-sm" name="shipper_id"><option value="">Tự động: shipper gần nhất</option>{% for u, load in shippers if u.is_available %}<option value="{{ u.id }}">{{ u.full_name }} ({{ u.district }}, {{ load }} đơn)</option>{% endfor %}</select>
+  <button class="btn btn-sm btn-leaf flex-shrink-0">Giao</button></form></td></tr>
+{% else %}<tr><td colspan="5" class="text-muted text-center py-3">Không có yêu cầu giao ngay.</td></tr>{% endfor %}</tbody></table></div>
+
+<div class="panel mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-2"><h2 class="h5 mb-0">Luồng giao tiết kiệm (gom đơn)</h2>
+    <form method="post" action="{{ url_for('ops.batch_orders') }}"><button class="btn btn-leaf" {{ 'disabled' if not groups }}>Gom đơn tự động</button></form></div>
+  <p class="small text-muted">Tiêu chí: cùng khu vực giao · cùng khung giờ · hàng tương thích (tươi sống / khô) · tối đa {{ cfg.MAX_LOAD_KG }} kg và {{ cfg.MAX_STOPS }} điểm giao mỗi chuyến.</p>
+  {% for key, rs in groups.items() %}<div class="border rounded p-2 mb-2"><strong>{{ key[0] }}</strong> · {{ key[1] }} · {{ 'Hàng tươi sống' if key[2]=='fresh' else 'Hàng khô' }} — {{ rs|length }} đơn, {{ rs|sum(attribute='weight')|round(1) }} kg
+    <div class="small text-muted">{% for r in rs %}{{ r.suborder.code }} ({{ r.suborder.stall.name }}){{ ', ' if not loop.last }}{% endfor %}</div></div>
+  {% else %}<div class="text-muted">Chưa có đơn nào chờ gom.</div>{% endfor %}
+  <h3 class="h6 mt-3">Chuyến gần đây</h3>
+  <table class="table table-sm mb-0"><tbody>{% for t in trips %}<tr><td>{{ t.code }}</td><td>{{ t.district }} · {{ t.window }}</td><td>{{ t.shipper.full_name }}</td><td>{{ t.requests|length }} đơn</td><td>{{ 'Hoàn tất' if t.status=='done' else 'Đang thực hiện' }}</td></tr>
+  {% else %}<tr><td class="text-muted">Chưa có chuyến nào.</td></tr>{% endfor %}</tbody></table>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6"><div class="panel h-100"><h2 class="h5">Shipper</h2><table class="table table-sm mb-0"><tbody>
+    {% for u, load in shippers %}<tr><td>{{ u.full_name }}<div class="small text-muted">{{ u.district }} · {{ u.vehicle }}</div></td><td>{{ load }} đơn</td><td>{% if u.is_available %}<span class="badge text-bg-success">Sẵn sàng</span>{% else %}<span class="badge text-bg-secondary">Nghỉ</span>{% endif %}</td></tr>{% endfor %}</tbody></table></div></div>
+  <div class="col-lg-6"><div class="panel h-100"><h2 class="h5">Đối soát COD</h2><table class="table table-sm mb-0"><tbody>
+    {% for r in cod %}<tr><td>{{ r.suborder.code }}<div class="small text-muted">{{ r.shipper.full_name }}</div></td><td>{{ r.cod_amount|money }}</td><td><form method="post" action="{{ url_for('ops.reconcile', rid=r.id) }}"><button class="btn btn-sm btn-outline-leaf">Đã nhận tiền</button></form></td></tr>
+    {% else %}<tr><td class="text-muted">Không có khoản nào chờ đối soát.</td></tr>{% endfor %}</tbody></table></div></div>
+</div>
+{% endblock %}

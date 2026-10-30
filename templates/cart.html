@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Giỏ hàng{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Giỏ hàng</h1>
+{% if groups %}
+<form method="post" action="{{ url_for('shop.cart_update') }}">
+  {% for stall, items in groups.items() %}
+  <div class="panel mb-3">
+    <h2 class="h6"><i class="bi bi-shop text-success"></i> {{ stall.name }} <span class="text-muted fw-normal">· {{ stall.market.name }}</span></h2>
+    <table class="table align-middle mb-0"><tbody>
+    {% for it in items %}<tr>
+      <td style="width:60px" class="fs-3">{{ it.product.emoji }}</td>
+      <td><a class="text-decoration-none fw-medium" href="{{ url_for('shop.product_detail', pid=it.product.id) }}">{{ it.product.name }}</a><div class="small text-muted">{{ it.product.price|money }}/{{ it.product.unit }}</div></td>
+      <td style="width:110px"><input class="form-control form-control-sm" type="number" min="0" max="{{ it.product.stock }}" name="qty_{{ it.product.id }}" value="{{ it.qty }}" aria-label="Số lượng"></td>
+      <td class="text-end fw-bold" style="width:130px">{{ it.line|money }}</td>
+      <td style="width:50px"><button class="btn btn-sm btn-outline-danger" formaction="{{ url_for('shop.cart_remove', pid=it.product.id) }}" aria-label="Xoá"><i class="bi bi-trash"></i></button></td></tr>{% endfor %}
+    </tbody></table>
+  </div>{% endfor %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div class="small text-muted">Giỏ có sản phẩm từ {{ groups|length }} gian hàng – hệ thống sẽ tách thành {{ groups|length }} đơn người bán.</div>
+    <div class="text-end"><div class="fs-5">Tạm tính: <strong>{{ total|money }}</strong></div>
+      <button class="btn btn-outline-dark">Cập nhật giỏ</button>
+      <a class="btn btn-leaf" href="{{ url_for('shop.checkout') }}">Đặt hàng</a></div>
+  </div>
+</form>
+{% else %}<div class="panel text-center py-5">Giỏ hàng đang trống. <a href="{{ url_for('shop.products') }}">Đi chợ thôi</a>.</div>{% endif %}
+{% endblock %}

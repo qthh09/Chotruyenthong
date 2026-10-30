@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Chuyến giao của tôi{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2"><h1 class="h3 mb-0">Chuyến giao của tôi</h1>
+  <form method="post" action="{{ url_for('ops.toggle') }}"><button class="btn {{ 'btn-leaf' if g.user.is_available else 'btn-outline-secondary' }}">{{ 'Đang nhận chuyến – bấm để nghỉ' if g.user.is_available else 'Đang nghỉ – bấm để nhận chuyến' }}</button></form></div>
+<div class="stat bad mb-4" style="max-width:340px"><div class="n">{{ cod_hold|money }}</div><div class="l">Tiền COD đang giữ, chờ đối soát</div></div>
+{% for r in mine %}
+<div class="panel mb-3">
+  <div class="d-flex justify-content-between"><div><strong>{{ r.suborder.code }}</strong> · {{ 'Giao ngay' if r.type=='instant' else 'Chuyến gom ' + (r.trip.code if r.trip else '') }}</div>{{ r.status|badge('deliv') }}</div>
+  <div class="row mt-2 g-2 small">
+    <div class="col-md-6"><div class="text-muted">Lấy hàng tại</div><strong>{{ r.suborder.stall.name }}</strong><br>{{ r.suborder.stall.address }}, {{ r.suborder.stall.market.name }}</div>
+    <div class="col-md-6"><div class="text-muted">Giao cho</div><strong>{{ r.suborder.order.receiver_name }}</strong> · {{ r.suborder.order.phone }}<br>{{ r.suborder.order.address }}, {{ r.district }}{% if r.window %} · {{ r.window }}{% endif %}</div>
+  </div>
+  {% if r.suborder.order.payment_method == 'cod' %}<div class="mt-2 fw-bold text-danger">Thu hộ COD: {{ r.suborder.total|money }}</div>{% endif %}
+  {% if r.suborder.order.note %}<div class="small mt-1">Ghi chú: {{ r.suborder.order.note }}</div>{% endif %}
+  <div class="mt-3">
+    {% if r.status == 'assigned' %}<span class="text-muted">Đến gian hàng lấy hàng – chờ Merchant bàn giao trên hệ thống.</span>
+    {% elif r.status == 'picked' %}<form method="post" action="{{ url_for('ops.delivery_action', rid=r.id, act='start') }}"><button class="btn btn-leaf">Đã lấy hàng – bắt đầu giao</button></form>
+    {% elif r.status == 'delivering' %}<form method="post" action="{{ url_for('ops.delivery_action', rid=r.id, act='done') }}"><button class="btn btn-leaf">Đã giao thành công{{ ' & thu COD' if r.suborder.order.payment_method=='cod' }}</button></form>{% endif %}
+  </div>
+</div>
+{% else %}<div class="panel text-center py-4 text-muted">Chưa có chuyến nào được giao cho bạn.</div>{% endfor %}
+<h2 class="h5 mt-4">Đã giao gần đây</h2>
+<div class="panel p-0"><table class="table mb-0"><tbody>{% for r in done %}<tr><td>{{ r.suborder.code }}</td><td>{{ r.suborder.order.receiver_name }}</td><td>{{ r.fee|money }}</td><td>{% if r.cod_amount %}COD {{ r.cod_amount|money }} {{ 'đã đối soát' if r.cod_reconciled else 'chờ đối soát' }}{% endif %}</td></tr>{% else %}<tr><td class="text-muted text-center py-3">Chưa có.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

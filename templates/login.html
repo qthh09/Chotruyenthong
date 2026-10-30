@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Đăng nhập{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-5"><div class="panel">
+  <h1 class="h4 mb-3">Đăng nhập</h1>
+  <form method="post"><div class="mb-3"><label class="form-label">Email</label><input class="form-control" type="email" name="email" required autofocus></div>
+  <div class="mb-3"><label class="form-label">Mật khẩu</label><input class="form-control" type="password" name="password" required></div>
+  <button class="btn btn-leaf w-100">Đăng nhập</button></form>
+  <p class="mt-3 mb-0 small">Chưa có tài khoản? <a href="{{ url_for('auth.register') }}">Đăng ký</a></p>
+</div>
+<div class="panel mt-3 small"><strong>Tài khoản demo</strong> (mật khẩu <code>123456</code>)
+<table class="table table-sm mt-2 mb-0"><tr><td>Khách hàng</td><td>khach@cho.vn</td></tr><tr><td>Người bán</td><td>banhang1@cho.vn (…2, …3)</td></tr><tr><td>BQL chợ</td><td>bql@cho.vn</td></tr><tr><td>Vận hành</td><td>operator@cho.vn</td></tr><tr><td>Shipper</td><td>shipper1@cho.vn (…2, …3)</td></tr><tr><td>Quản trị</td><td>admin@cho.vn</td></tr><tr><td>Chờ duyệt</td><td>banhang4@cho.vn</td></tr></table></div>
+</div></div>
+{% endblock %}

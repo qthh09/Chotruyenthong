@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Đơn {{ s.code }}{% endblock %}
+{% block content %}
+{% include "merchant/_nav.html" %}
+<div class="row g-4">
+  <div class="col-lg-7"><div class="panel">
+    <div class="d-flex justify-content-between"><h1 class="h5">Đơn {{ s.code }}</h1>{{ s.status|badge('sub') }}</div>
+    <table class="table"><thead><tr><th>Sản phẩm</th><th>Lô</th><th class="text-end">SL</th><th class="text-end">Thành tiền</th></tr></thead><tbody>
+    {% for it in s.items %}<tr><td>{{ it.name }}<div class="small text-muted">{{ it.unit_price|money }}/{{ it.unit }}</div></td><td class="small">{{ it.batch_code or '—' }}</td><td class="text-end">{{ it.quantity }}</td><td class="text-end">{{ it.line_total|money }}</td></tr>{% endfor %}</tbody>
+    <tfoot><tr><td colspan="3" class="text-end">Tiền hàng</td><td class="text-end fw-bold">{{ s.subtotal|money }}</td></tr></tfoot></table>
+    <div class="small text-muted">Khách: {{ s.order.receiver_name }} · {{ s.order.phone }}<br>Địa chỉ: {{ s.order.address }}{% if s.order.district %}, {{ s.order.district }}{% endif %}<br>
+      Giao: {{ DELIVERY_LABEL[s.order.delivery_type] }}{% if s.order.time_window %} ({{ s.order.time_window }}){% endif %} · {{ PAYMENT_LABEL[s.order.payment_method] }}{% if s.order.note %}<br>Ghi chú của khách: <strong>{{ s.order.note }}</strong>{% endif %}</div>
+    {% if s.reject_reason %}<div class="text-danger mt-2">Lý do từ chối: {{ s.reject_reason }}</div>{% endif %}
+  </div></div>
+  <div class="col-lg-5"><div class="panel">
+    <h2 class="h6">Xử lý đơn</h2>
+    <form method="post" action="{{ url_for('merchant.order_action', sid=s.id) }}" class="d-grid gap-2">
+    {% if s.status == 'new' %}
+      <button class="btn btn-leaf" name="action" value="accept">Xác nhận đơn (đủ hàng)</button>
+      <input class="form-control" name="reason" placeholder="Lý do nếu từ chối (VD: hết hàng)">
+      <button class="btn btn-outline-danger" name="action" value="reject">Từ chối / báo hết hàng</button>
+    {% elif s.status == 'accepted' %}<button class="btn btn-leaf" name="action" value="prepare">Bắt đầu chuẩn bị hàng</button>
+    {% elif s.status == 'preparing' %}<button class="btn btn-leaf" name="action" value="ready">Đã chuẩn bị xong – sẵn sàng giao</button>
+    {% elif s.status == 'ready' %}
+      {% if s.order.delivery_type == 'pickup' %}<button class="btn btn-leaf" name="action" value="pickup_done">Khách đã đến lấy hàng</button>
+      {% else %}<button class="btn btn-leaf" name="action" value="request_ship">Đặt ship địa phương ({{ DELIVERY_LABEL[s.order.delivery_type] }})</button>{% endif %}
+    {% elif s.status == 'ship_requested' %}
+      {% if s.delivery and s.delivery.status == 'assigned' %}<div class="small mb-1">Shipper <strong>{{ s.delivery.shipper.full_name }}</strong> ({{ s.delivery.shipper.phone }}) đã nhận chuyến.</div>
+        <button class="btn btn-leaf" name="action" value="handover">Bàn giao hàng cho shipper</button>
+      {% else %}<div class="text-muted">Đang chờ điều phối {{ 'tìm shipper gần nhất' if s.order.delivery_type=='instant' else 'gom đơn vào chuyến' }}…</div>{% endif %}
+    {% elif s.status in ('handed_over','delivering') %}<div class="text-muted">Shipper đang vận chuyển. Trạng thái sẽ tự cập nhật khi giao xong.</div>
+    {% elif s.status == 'completed' %}<div class="text-success">Đơn đã hoàn tất. Doanh thu {{ s.subtotal|money }} đã được ghi nhận.</div>
+    {% else %}<div class="text-muted">Không còn thao tác nào.</div>{% endif %}
+    </form>
+    {% if s.delivery %}<hr><div class="small">Vận chuyển: {{ s.delivery.status|badge('deliv') }}{% if s.delivery.trip %}<br>Chuyến gom: {{ s.delivery.trip.code }}{% endif %}</div>{% endif %}
+    <a class="btn btn-link px-0 mt-2" href="{{ url_for('merchant.orders') }}">← Danh sách đơn</a>
+  </div></div>
+</div>
+{% endblock %}

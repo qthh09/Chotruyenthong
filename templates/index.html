@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Đi chợ sáng nay, không cần ra khỏi nhà.</h1>
+  <p class="mt-3">Rau củ, thịt cá, đồ khô từ gian hàng thật ở các chợ Hà Nội. Một giỏ hàng có thể gom nhiều gian hàng, giao ngay hoặc giao tiết kiệm.</p>
+  <form class="searchbox mt-4" action="{{ url_for('shop.products') }}">
+    <input name="q" placeholder="Tìm rau muống, thịt ba chỉ, nước mắm…" aria-label="Tìm sản phẩm">
+    <button class="btn btn-leaf rounded-pill px-4">Tìm</button>
+  </form>
+  <div class="d-flex flex-wrap gap-2 mt-4">
+    {% for c in cats %}<a class="chip" href="{{ url_for('shop.products', cat=c.id) }}">{{ c.emoji }} {{ c.name }}</a>{% endfor %}
+  </div>
+</section>
+<section class="mb-5">
+  <h2 class="h4 mb-3">Hàng mới lên gian</h2>
+  <div class="row g-3">{% for p in featured %}<div class="col-6 col-md-4 col-lg-3">{% include "_card.html" %}</div>{% endfor %}</div>
+</section>
+<section class="mb-5">
+  <h2 class="h4 mb-3">Chợ trên hệ thống</h2>
+  <div class="row g-3">{% for m in markets %}
+    <div class="col-md-6 col-lg-3"><a class="panel d-block text-decoration-none text-dark h-100" href="{{ url_for('shop.products', market=m.id) }}">
+      <i class="bi bi-shop fs-3 text-success"></i><div class="fw-bold mt-1">{{ m.name }}</div><div class="small text-muted">{{ m.address }}</div></a></div>{% endfor %}</div>
+</section>
+<section>
+  <h2 class="h4 mb-3">Gian hàng tiêu biểu</h2>
+  <div class="row g-3">{% for s in stalls %}
+    <div class="col-md-4"><a class="panel d-block text-decoration-none text-dark h-100" href="{{ url_for('shop.stall', sid=s.id) }}">
+      <div class="fs-2">{{ s.category.emoji }}</div><div class="fw-bold">{{ s.name }}</div><div class="small text-muted">{{ s.market.name }}</div></a></div>{% endfor %}</div>
+</section>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Chợ & ngành hàng{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-6"><div class="panel"><h1 class="h5">Chợ</h1>
+    <table class="table table-sm">{% for m in markets %}<tr><td>{{ m.name }}</td><td>{{ m.district }}</td></tr>{% endfor %}</table>
+    <form method="post" class="row g-2"><input type="hidden" name="kind" value="market">
+      <div class="col-12"><input class="form-control form-control-sm" name="name" placeholder="Tên chợ" required></div>
+      <div class="col-8"><input class="form-control form-control-sm" name="address" placeholder="Địa chỉ"></div>
+      <div class="col-4"><select class="form-select form-select-sm" name="district">{% for d in DISTRICTS %}<option>{{ d }}</option>{% endfor %}</select></div>
+      <div class="col-12"><button class="btn btn-sm btn-leaf">Thêm chợ</button></div></form></div></div>
+  <div class="col-lg-6"><div class="panel"><h1 class="h5">Nhóm ngành hàng & phí gian hàng</h1>
+    <table class="table table-sm">{% for c in cats %}<tr><td>{{ c.emoji }} {{ c.name }}</td><td>{{ c.fee_per_month|money }}/tháng</td><td>{{ {'fresh':'Tươi sống','dry':'Khô','general':'Chung'}[c.handling] }}</td></tr>{% endfor %}</table>
+    <form method="post" class="row g-2"><input type="hidden" name="kind" value="category">
+      <div class="col-8"><input class="form-control form-control-sm" name="name" placeholder="Tên ngành hàng" required></div>
+      <div class="col-4"><input class="form-control form-control-sm" name="emoji" placeholder="Emoji"></div>
+      <div class="col-6"><input class="form-control form-control-sm" type="number" name="fee_per_month" placeholder="Phí/tháng"></div>
+      <div class="col-6"><select class="form-select form-select-sm" name="handling"><option value="fresh">Tươi sống</option><option value="dry">Khô</option><option value="general">Chung</option></select></div>
+      <div class="col-12"><button class="btn btn-sm btn-leaf">Thêm ngành hàng</button></div></form></div></div>
+</div>
+{% endblock %}

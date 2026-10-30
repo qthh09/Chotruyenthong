@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Khiếu nại & hỗ trợ{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Khiếu nại & hỗ trợ</h1>
+{% for t in items %}<div class="panel mb-3">
+  <div class="d-flex justify-content-between"><div><strong>{{ t.user.full_name }}</strong>{% if t.order %} · đơn <a href="{{ url_for('shop.order_detail', oid=t.order_id) }}">{{ t.order.code }}</a>{% endif %} <span class="small text-muted">{{ t.created_at|dt }}</span></div>
+    <span class="badge text-bg-{{ 'warning' if t.status=='open' else 'success' }}">{{ 'Chưa xử lý' if t.status=='open' else 'Đã phản hồi' }}</span></div>
+  <p class="mt-2">{{ t.content }}</p>
+  <form method="post" class="d-flex gap-2"><input type="hidden" name="ticket_id" value="{{ t.id }}"><input class="form-control" name="reply" value="{{ t.reply or '' }}" placeholder="Nội dung phản hồi"><button class="btn btn-leaf flex-shrink-0">Gửi phản hồi</button></form>
+</div>{% else %}<div class="panel text-center py-4 text-muted">Chưa có yêu cầu nào.</div>{% endfor %}
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Đơn {{ o.code }}{% endblock %}
+{% block content %}
+{% set flow = ['new','accepted','preparing','ready','handed_over','delivering','completed'] %}
+{% set names = {'new':'Gửi gian hàng','accepted':'Xác nhận','preparing':'Chuẩn bị','ready':'Sẵn sàng','handed_over':'Giao shipper','delivering':'Đang giao','completed':'Hoàn tất'} %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+  <div><h1 class="h3 mb-1">Đơn {{ o.code }}</h1><div class="text-muted">Đặt lúc {{ o.created_at|dt }} · {{ DELIVERY_LABEL[o.delivery_type] }}{% if o.time_window %} ({{ o.time_window }}){% endif %}</div></div>
+  <div>{{ o.status|badge('order') }} {{ o.payment_status|badge('pay') }}</div>
+</div>
+<div class="row g-4">
+  <div class="col-lg-8">
+  {% for s in o.suborders %}
+    <div class="panel mb-3">
+      <div class="d-flex justify-content-between"><h2 class="h6"><a href="{{ url_for('shop.stall', sid=s.stall_id) }}">{{ s.stall.name }}</a> <span class="text-muted fw-normal">· đơn {{ s.code }}</span></h2>{{ s.status|badge('sub') }}</div>
+      {% if s.status in ('rejected','cancelled') %}<div class="text-danger small mb-2">{{ s.reject_reason or 'Đơn đã bị huỷ' }}</div>
+      {% else %}
+      {% set idx = {'pending_payment':0,'new':0,'accepted':1,'preparing':2,'ready':3,'ship_requested':3,'handed_over':4,'delivering':5,'completed':7}.get(s.status,0) %}
+      <ol class="steps mb-3">{% for f in flow %}{% set i = loop.index0 %}<li class="{{ 'done' if i < idx or s.status=='completed' else ('now' if i==idx else '') }}">{{ names[f] }}</li>{% endfor %}</ol>{% endif %}
+      <table class="table table-sm mb-2"><tbody>{% for it in s.items %}<tr>
+        <td>{{ it.name }} × {{ it.quantity }} {{ it.unit }}{% if it.batch_code %}<div class="small"><a href="{{ url_for('shop.trace', code=it.batch_code) }}"><i class="bi bi-qr-code"></i> Lô {{ it.batch_code }}</a></div>{% endif %}</td>
+        <td class="text-end">{{ it.line_total|money }}</td></tr>
+        {% if s.status=='completed' and it.product_id %}<tr><td colspan="2">
+          {% set rv = it.product.reviews|selectattr('item_id','equalto',it.id)|list %}
+          {% if rv %}<span class="small text-muted">Bạn đã đánh giá {{ '★' * rv[0].rating }}</span>
+          {% elif g.user.id == o.customer_id %}<form method="post" action="{{ url_for('shop.review', item_id=it.id) }}" class="d-flex gap-2">
+            <select class="form-select form-select-sm w-auto" name="rating">{% for n in [5,4,3,2,1] %}<option value="{{n}}">{{n}} ★</option>{% endfor %}</select>
+            <input class="form-control form-control-sm" name="comment" placeholder="Nhận xét về {{ it.name }}"><button class="btn btn-sm btn-outline-leaf">Đánh giá</button></form>{% endif %}
+        </td></tr>{% endif %}{% endfor %}</tbody></table>
+      <div class="small text-muted text-end">Hàng {{ s.subtotal|money }} · Giao {{ s.shipping_fee|money }}</div>
+      {% if s.delivery %}<div class="small mt-1">Vận chuyển: {{ s.delivery.status|badge('deliv') }} {% if s.delivery.shipper %}· Shipper {{ s.delivery.shipper.full_name }} ({{ s.delivery.shipper.phone }}){% endif %}{% if s.delivery.trip %} · chuyến gom {{ s.delivery.trip.code }}{% endif %}</div>{% endif %}
+    </div>
+  {% endfor %}
+  </div>
+  <div class="col-lg-4">
+    <div class="panel mb-3"><h2 class="h6">Giao tới</h2><div>{{ o.receiver_name }} · {{ o.phone }}</div><div class="text-muted">{{ o.address }}{% if o.district %}, {{ o.district }}{% endif %}</div>
+      {% if o.note %}<div class="small mt-2">Ghi chú: {{ o.note }}</div>{% endif %}</div>
+    <div class="panel mb-3"><div class="d-flex justify-content-between"><span>Hàng hóa</span><span>{{ o.subtotal|money }}</span></div>
+      <div class="d-flex justify-content-between"><span>Phí giao</span><span>{{ o.shipping_fee|money }}</span></div>
+      <div class="d-flex justify-content-between fw-bold fs-5"><span>Tổng</span><span>{{ o.total|money }}</span></div>
+      <div class="small text-muted">{{ PAYMENT_LABEL[o.payment_method] }}</div>
+      {% if o.status == 'awaiting_payment' or o.payment_status == 'failed' %}<a class="btn btn-leaf w-100 mt-2" href="{{ url_for('shop.pay', oid=o.id) }}">Thanh toán ngay</a>{% endif %}
+      {% if g.user.id == o.customer_id and o.status in ('processing','awaiting_payment') %}<form method="post" action="{{ url_for('shop.order_cancel', oid=o.id) }}" class="mt-2"><button class="btn btn-outline-danger w-100 btn-sm">Huỷ đơn</button></form>{% endif %}</div>
+    {% if g.user.id == o.customer_id %}<div class="panel"><h2 class="h6">Cần hỗ trợ hoặc khiếu nại?</h2>
+      <form method="post" action="{{ url_for('shop.ticket') }}"><input type="hidden" name="order_id" value="{{ o.id }}"><textarea class="form-control mb-2" name="content" rows="3" required placeholder="Mô tả vấn đề với đơn hàng"></textarea><button class="btn btn-outline-dark btn-sm">Gửi yêu cầu</button></form></div>{% endif %}
+  </div>
+</div>
+{% endblock %}

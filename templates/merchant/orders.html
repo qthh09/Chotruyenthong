@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Đơn hàng{% endblock %}
+{% block content %}
+{% include "merchant/_nav.html" %}
+<div class="d-flex flex-wrap gap-2 mb-3">
+  <a class="chip {{ 'on' if not status }}" href="{{ url_for('merchant.orders') }}">Tất cả</a>
+  {% for k in ['new','accepted','preparing','ready','ship_requested','handed_over','delivering','completed','rejected'] %}<a class="chip {{ 'on' if status==k }}" href="{{ url_for('merchant.orders', status=k) }}">{{ {'new':'Đơn mới','accepted':'Đã xác nhận','preparing':'Chuẩn bị','ready':'Sẵn sàng','ship_requested':'Chờ shipper','handed_over':'Đã bàn giao','delivering':'Đang giao','completed':'Hoàn tất','rejected':'Từ chối'}[k] }}</a>{% endfor %}
+</div>
+<div class="panel p-0 table-responsive"><table class="table mb-0"><thead><tr><th>Mã đơn</th><th>Ngày</th><th>Khách</th><th>Giao hàng</th><th>Giá trị</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+{% for s in items %}<tr><td class="fw-medium">{{ s.code }}</td><td>{{ s.created_at|dt }}</td><td>{{ s.order.receiver_name }}</td><td>{{ DELIVERY_LABEL[s.order.delivery_type] }}</td><td>{{ s.subtotal|money }}</td><td>{{ s.status|badge('sub') }}</td>
+<td><a class="btn btn-sm btn-outline-dark" href="{{ url_for('merchant.order_detail', sid=s.id) }}">Xem</a></td></tr>
+{% else %}<tr><td colspan="7" class="text-center text-muted py-4">Chưa có đơn nào ở mục này.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

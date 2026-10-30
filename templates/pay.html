@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Thanh toán{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-6"><div class="panel text-center">
+  <h1 class="h4">Thanh toán đơn {{ o.code }}</h1>
+  <p class="text-muted">{{ PAYMENT_LABEL[o.payment_method] }}</p>
+  <div class="display-6 fw-bold my-3">{{ o.total|money }}</div>
+  <div class="mx-auto my-3 border rounded d-flex align-items-center justify-content-center" style="width:180px;height:180px;background:repeating-conic-gradient(#1d2a26 0 25%,#fff 0 50%) 0 0/24px 24px">
+    <span class="bg-white px-2 small">Mã QR giả lập</span></div>
+  <p class="small text-muted">Đây là cổng thanh toán giả lập để thử nghiệm luồng nghiệp vụ.</p>
+  <form method="post" class="d-flex gap-2 justify-content-center">
+    <button class="btn btn-leaf" name="result" value="success">Thanh toán thành công</button>
+    <button class="btn btn-outline-danger" name="result" value="fail">Giả lập thất bại</button>
+  </form>
+  <form method="post" action="{{ url_for('shop.order_cancel', oid=o.id) }}" class="mt-3"><button class="btn btn-link text-muted btn-sm">Huỷ đơn</button></form>
+</div></div></div>
+{% endblock %}

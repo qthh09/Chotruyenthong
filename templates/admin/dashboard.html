@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Quản trị hệ thống{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Thống kê & báo cáo</h1>
+<div class="row g-3 mb-4">
+  {% for l, v in [('Người dùng', counts.users), ('Gian hàng hoạt động', counts.stalls), ('Sản phẩm', counts.products), ('Đơn hàng', counts.orders), ('Hỗ trợ chưa xử lý', counts.open_tickets)] %}
+  <div class="col-6 col-lg"><div class="stat {{ 'bad' if l.startswith('Hỗ') and v }}"><div class="n">{{ v }}</div><div class="l">{{ l }}</div></div></div>{% endfor %}
+</div>
+<div class="row g-3">
+  <div class="col-lg-8"><div class="panel"><h2 class="h6">Doanh thu hàng hóa toàn chợ – 14 ngày</h2><canvas id="c1" height="110"></canvas>
+    <div class="small text-muted mt-2">Tổng doanh thu từ đầu: <strong>{{ stats.total|money }}</strong> · Tháng này: <strong>{{ stats.this_month|money }}</strong></div></div></div>
+  <div class="col-lg-4"><div class="panel h-100"><h2 class="h6">Doanh thu theo tháng</h2><canvas id="c2" height="200"></canvas>
+    <h2 class="h6 mt-3">Gian hàng bán chạy</h2>{% for n, v in top %}<div class="d-flex justify-content-between small"><span>{{ n }}</span><span>{{ v|money }}</span></div>{% endfor %}</div></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+new Chart(document.getElementById('c1'),{type:'line',data:{labels:{{ stats.day_labels|tojson }},datasets:[{label:'Doanh thu',data:{{ stats.day_values|tojson }},borderColor:'#1f6f5c',backgroundColor:'#1f6f5c33',fill:true,tension:.25}]},options:{plugins:{legend:{display:false}}}});
+new Chart(document.getElementById('c2'),{type:'bar',data:{labels:{{ stats.month_labels|tojson }},datasets:[{data:{{ stats.month_values|tojson }},backgroundColor:'#f2c230'}]},options:{plugins:{legend:{display:false}}}});
+</script>{% endblock %}

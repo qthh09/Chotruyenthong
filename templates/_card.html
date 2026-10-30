@@ -1,0 +1,14 @@
+<div class="pcard">
+  <a class="pic" href="{{ url_for('shop.product_detail', pid=p.id) }}" aria-hidden="true" tabindex="-1">{{ p.emoji }}</a>
+  <div class="body">
+    <a class="fw-bold text-decoration-none text-dark" href="{{ url_for('shop.product_detail', pid=p.id) }}">{{ p.name }}</a>
+    <a class="stall text-decoration-none" href="{{ url_for('shop.stall', sid=p.stall_id) }}">{{ p.stall.name }} · {{ p.stall.market.name }}</a>
+    <div class="price">{{ p.price|money }}<span class="text-muted fw-normal">/{{ p.unit }}</span></div>
+    {% if p.batch and p.batch.verified %}<span class="small text-success"><i class="bi bi-patch-check-fill"></i> Đã xác minh nguồn gốc</span>{% endif %}
+    <form method="post" action="{{ url_for('shop.cart_add') }}" class="mt-auto pt-2">
+      <input type="hidden" name="product_id" value="{{ p.id }}"><input type="hidden" name="qty" value="1">
+      <input type="hidden" name="back" value="{{ request.full_path.rstrip('?') }}">
+      <button class="btn btn-sm btn-leaf w-100" {% if p.stock <= 0 %}disabled{% endif %}>{{ 'Thêm vào giỏ' if p.stock > 0 else 'Hết hàng' }}</button>
+    </form>
+  </div>
+</div>

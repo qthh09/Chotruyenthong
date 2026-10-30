@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Gian hàng của tôi{% endblock %}
+{% block content %}
+{% include "merchant/_nav.html" %}
+{% if not s %}
+  <div class="panel text-center py-5"><h1 class="h4">Mở gian hàng số của bạn</h1><p class="text-muted">Điền hồ sơ, tải giấy tờ minh chứng, Ban quản lý chợ sẽ kiểm tra và kích hoạt.</p>
+    <a class="btn btn-leaf" href="{{ url_for('merchant.stall_form') }}">Đăng ký gian hàng số</a></div>
+{% elif s.status != 'active' %}
+  <div class="panel">
+    <h1 class="h4">{{ s.name }} {{ s.status|badge('stall') }}</h1>
+    {% set order = ['submitted','awaiting_payment','paid','active'] %}
+    <ol class="steps my-3">
+      <li class="{{ 'done' if s.status!='draft' else '' }}">Nộp hồ sơ</li>
+      <li class="{{ 'bad' if s.status=='need_more' else ('done' if s.status in ['awaiting_payment','paid','active'] else 'now') }}">BQL kiểm tra</li>
+      <li class="{{ 'done' if s.status in ['paid','active'] else ('now' if s.status=='awaiting_payment' else '') }}">Thanh toán phí</li>
+      <li class="{{ 'done' if s.status=='active' else ('now' if s.status=='paid' else '') }}">Phê duyệt & kích hoạt</li>
+    </ol>
+    {% if s.bql_note %}<div class="alert alert-{{ 'danger' if s.status in ['need_more','rejected'] else 'info' }}"><strong>Phản hồi từ Ban quản lý chợ:</strong> {{ s.bql_note }}</div>{% endif %}
+    {% if s.status == 'need_more' %}<a class="btn btn-leaf" href="{{ url_for('merchant.stall_form') }}">Nộp bổ sung hồ sơ</a>
+    {% elif s.status == 'awaiting_payment' %}<a class="btn btn-leaf" href="{{ url_for('merchant.pay_fee') }}">Thanh toán phí {{ s.fee|money }}</a>
+    {% elif s.status == 'submitted' %}<p class="text-muted mb-0">Hồ sơ đang chờ Ban quản lý chợ kiểm tra.</p>
+    {% elif s.status == 'paid' %}<p class="text-muted mb-0">Đã nhận phí. Đang chờ Ban quản lý chợ phê duyệt đăng ký.</p>{% endif %}
+  </div>
+{% else %}
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="stat warn"><div class="n">{{ stats.new_orders }}</div><div class="l">Đơn mới cần xác nhận</div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat"><div class="n">{{ stats.processing }}</div><div class="l">Đơn đang xử lý</div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat"><div class="n">{{ stats.today|money }}</div><div class="l">Doanh thu hôm nay</div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat"><div class="n">{{ stats.this_month|money }}</div><div class="l">Doanh thu tháng này</div></div></div>
+  </div>
+  <div class="row g-3">
+    <div class="col-lg-8"><div class="panel"><h2 class="h6">Doanh thu 14 ngày gần nhất</h2><canvas id="c1" height="110"></canvas></div></div>
+    <div class="col-lg-4"><div class="panel h-100"><h2 class="h6">Doanh thu theo tháng</h2>
+      <table class="table table-sm mb-0">{% for l, v in zip(stats.month_labels, stats.month_values) %}<tr><td>{{ l }}</td><td class="text-end">{{ v|money }}</td></tr>{% endfor %}</table>
+      {% if stats.low_stock %}<hr><h2 class="h6 text-danger">Sắp hết hàng</h2>{% for p in stats.low_stock %}<div class="small">{{ p.name }}: còn {{ p.stock }} {{ p.unit }}</div>{% endfor %}{% endif %}</div></div>
+  </div>
+{% endif %}
+{% endblock %}
+{% block scripts %}{% if stats %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>new Chart(document.getElementById('c1'),{type:'bar',data:{labels:{{ stats.day_labels|tojson }},datasets:[{label:'Doanh thu (đ)',data:{{ stats.day_values|tojson }},backgroundColor:'#1f6f5c'}]},options:{plugins:{legend:{display:false}}}});</script>{% endif %}{% endblock %}

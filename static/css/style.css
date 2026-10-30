@@ -1,0 +1,54 @@
+:root{
+  --ink:#1d2a26; --paper:#fdfcf8; --leaf:#1f6f5c; --leaf-dark:#154a3d; --lemon:#f2c230;
+  --chili:#d6402f; --line:#e6e2d6; --muted:#6b756f;
+  --bs-body-font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --bs-body-bg:var(--paper); --bs-body-color:var(--ink); --bs-link-color:var(--leaf); --bs-link-hover-color:var(--leaf-dark);
+}
+body{min-height:100vh;display:flex;flex-direction:column}
+main{flex:1}
+h1,h2,h3,h4,h5{font-weight:700;letter-spacing:-.01em}
+.btn-leaf{--bs-btn-bg:var(--leaf);--bs-btn-border-color:var(--leaf);--bs-btn-color:#fff;--bs-btn-hover-bg:var(--leaf-dark);--bs-btn-hover-border-color:var(--leaf-dark);--bs-btn-hover-color:#fff;--bs-btn-active-bg:var(--leaf-dark);--bs-btn-active-color:#fff}
+.btn-outline-leaf{--bs-btn-color:var(--leaf);--bs-btn-border-color:var(--leaf);--bs-btn-hover-bg:var(--leaf);--bs-btn-hover-border-color:var(--leaf);--bs-btn-hover-color:#fff}
+.btn-lemon{--bs-btn-bg:var(--lemon);--bs-btn-border-color:var(--lemon);--bs-btn-color:var(--ink);--bs-btn-hover-bg:#e3b21c;--bs-btn-hover-border-color:#e3b21c}
+:focus-visible{outline:3px solid var(--lemon);outline-offset:2px}
+
+/* Mái che chợ – chi tiết nhận diện duy nhất của trang */
+.awning{height:14px;background:repeating-linear-gradient(90deg,var(--leaf) 0 36px,var(--paper) 36px 72px);
+  border-bottom:3px solid var(--leaf-dark);position:relative}
+.awning::after{content:"";position:absolute;left:0;right:0;top:100%;height:10px;
+  background:radial-gradient(circle at 18px 0,var(--leaf) 0 17px,transparent 18px) 0 0/72px 10px repeat-x,
+             radial-gradient(circle at 54px 0,#ece8d8 0 17px,transparent 18px) 0 0/72px 10px repeat-x}
+.topbar{background:var(--paper);border-bottom:1px solid var(--line)}
+.brand{font-weight:800;font-size:1.25rem;color:var(--leaf-dark)!important}
+.brand small{display:block;font-size:.68rem;font-weight:500;color:var(--muted);margin-top:-4px}
+.navbar .nav-link{font-weight:500}
+.hero{padding:3.5rem 0 2.5rem}
+.hero h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:800;line-height:1.12;max-width:16ch}
+.hero p{max-width:52ch;color:var(--muted);font-size:1.08rem}
+.searchbox{background:#fff;border:2px solid var(--ink);border-radius:999px;padding:.35rem .35rem .35rem 1.2rem;display:flex;gap:.5rem;max-width:560px}
+.searchbox input{border:0;outline:0;flex:1;background:transparent;min-width:0}
+.chip{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink);text-decoration:none;font-weight:500}
+.chip:hover,.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pcard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;height:100%;display:flex;flex-direction:column;transition:border-color .15s}
+.pcard:hover{border-color:var(--leaf)}
+.pcard .pic{background:#f3efe2;font-size:3.6rem;text-align:center;padding:1.1rem 0;text-decoration:none}
+.pcard .price{font-weight:800;color:var(--chili)}
+.pcard .body{padding:.9rem 1rem 1rem;display:flex;flex-direction:column;gap:.25rem;flex:1}
+.pcard .stall{font-size:.82rem;color:var(--muted)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.25rem}
+.stat{background:#fff;border:1px solid var(--line);border-left:5px solid var(--leaf);border-radius:10px;padding:.9rem 1.1rem}
+.stat .n{font-size:1.6rem;font-weight:800;line-height:1.1}
+.stat .l{color:var(--muted);font-size:.88rem}
+.stat.warn{border-left-color:var(--lemon)}.stat.bad{border-left-color:var(--chili)}
+.table>:not(caption)>*>*{vertical-align:middle}
+.steps{display:flex;gap:.4rem;flex-wrap:wrap;list-style:none;padding:0;margin:0}
+.steps li{padding:.3rem .75rem;border-radius:999px;background:#eee9d9;color:var(--muted);font-size:.85rem}
+.steps li.done{background:var(--leaf);color:#fff}
+.steps li.now{background:var(--lemon);color:var(--ink);font-weight:600}
+.steps li.bad{background:var(--chili);color:#fff}
+.footer{background:var(--leaf-dark);color:#cfe4dc;padding:1.6rem 0;margin-top:3rem;font-size:.92rem}
+.footer a{color:#fff}
+.notif-dot{position:absolute;top:-4px;right:-6px;font-size:.65rem}
+.unread{background:#fff8dc}
+.big-emoji{font-size:6rem;text-align:center;background:#f3efe2;border-radius:14px;padding:1.5rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}

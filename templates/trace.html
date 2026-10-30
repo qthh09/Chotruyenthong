@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Truy xuất nguồn gốc{% endblock %}
+{% block content %}
+<h1 class="h3">Truy xuất nguồn gốc hàng hóa</h1>
+<p class="text-muted">Nhập mã lô in trên sản phẩm hoặc trong chi tiết đơn hàng (ví dụ <code>LO-2610-001</code>).</p>
+<form class="searchbox mb-4" method="get"><input name="code" value="{{ code }}" placeholder="Nhập mã lô" aria-label="Mã lô"><button class="btn btn-leaf rounded-pill px-4">Tra cứu</button></form>
+{% if batch %}
+<div class="panel mb-3">
+  <ol class="steps mb-3"><li class="done">Nhà cung cấp</li><li class="done">Lô {{ batch.batch_code }}</li><li class="done">Người bán</li><li class="done">Gian hàng số</li><li class="done">Sản phẩm</li></ol>
+  <div class="row g-3">
+    <div class="col-md-4"><div class="small text-muted">Nhà cung cấp</div><strong>{{ batch.supplier.name }}</strong><div class="small">Mã: {{ batch.supplier.code }} · {{ batch.supplier.phone }}<br>{{ batch.supplier.address }}</div></div>
+    <div class="col-md-4"><div class="small text-muted">Lô hàng</div><strong>{{ batch.batch_code }}</strong><div class="small">Nhập {{ batch.import_date|dt }} · SL {{ batch.quantity }}<br>Chứng từ: {{ batch.document or '—' }}</div>
+      {% if batch.verified %}<span class="badge text-bg-success">Đã xác minh</span>{% else %}<span class="badge text-bg-warning">Chưa xác minh</span>{% endif %}</div>
+    <div class="col-md-4"><div class="small text-muted">Gian hàng bán</div><a href="{{ url_for('shop.stall', sid=batch.stall_id) }}"><strong>{{ batch.stall.name }}</strong></a><div class="small">{{ batch.stall.market.name }}</div></div>
+  </div>
+  <hr><div class="small text-muted mb-1">Sản phẩm thuộc lô này</div>
+  {% for p in products %}<a class="chip me-1 mb-1" href="{{ url_for('shop.product_detail', pid=p.id) }}">{{ p.emoji }} {{ p.name }}</a>{% else %}<span class="text-muted">Chưa gắn sản phẩm.</span>{% endfor %}
+</div>
+{% if affected is not none %}
+<div class="panel"><h2 class="h6">Truy xuất ngược khi có sự cố – đơn hàng chứa lô này ({{ affected|length }})</h2>
+<table class="table table-sm mb-0"><thead><tr><th>Đơn</th><th>Sản phẩm</th><th>SL</th><th>Người mua</th><th>Liên hệ</th><th>Trạng thái</th></tr></thead><tbody>
+{% for it in affected %}<tr><td><a href="{{ url_for('shop.order_detail', oid=it.suborder.order_id) }}">{{ it.suborder.code }}</a></td><td>{{ it.name }}</td><td>{{ it.quantity }}</td><td>{{ it.suborder.order.receiver_name }}</td><td>{{ it.suborder.order.phone }}</td><td>{{ it.suborder.status|badge('sub') }}</td></tr>
+{% else %}<tr><td colspan="6" class="text-muted">Chưa có đơn nào.</td></tr>{% endfor %}</tbody></table></div>
+{% elif g.user is none or g.user.role not in ('admin','bql') %}<p class="small text-muted">Danh sách đơn hàng liên quan chỉ hiển thị cho Ban quản lý chợ và quản trị viên (phục vụ khiếu nại, thu hồi).</p>{% endif %}
+{% endif %}
+{% endblock %}

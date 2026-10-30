@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Nguồn gốc & lô hàng{% endblock %}
+{% block content %}
+{% include "merchant/_nav.html" %}
+<div class="row g-4">
+  <div class="col-lg-6"><div class="panel">
+    <h2 class="h6">Nhà cung cấp / nhà sản xuất</h2>
+    <table class="table table-sm"><tbody>{% for s in suppliers %}<tr><td>{{ s.name }}<div class="small text-muted">{{ s.code }} · {{ s.phone }}</div></td></tr>{% else %}<tr><td class="text-muted">Chưa có nhà cung cấp.</td></tr>{% endfor %}</tbody></table>
+    <form method="post" class="row g-2"><input type="hidden" name="kind" value="supplier">
+      <div class="col-8"><input class="form-control form-control-sm" name="name" placeholder="Tên nhà cung cấp" required></div>
+      <div class="col-4"><input class="form-control form-control-sm" name="code" placeholder="Mã"></div>
+      <div class="col-5"><input class="form-control form-control-sm" name="phone" placeholder="Liên hệ"></div>
+      <div class="col-7"><input class="form-control form-control-sm" name="address" placeholder="Địa chỉ"></div>
+      <div class="col-12"><button class="btn btn-sm btn-outline-leaf">Thêm nhà cung cấp</button></div></form>
+  </div></div>
+  <div class="col-lg-6"><div class="panel">
+    <h2 class="h6">Ghi nhận lô hàng nhập</h2>
+    <form method="post" class="row g-2"><input type="hidden" name="kind" value="batch">
+      <div class="col-6"><input class="form-control form-control-sm" name="batch_code" placeholder="Mã lô (VD: LO-2610-010)" required></div>
+      <div class="col-6"><select class="form-select form-select-sm" name="supplier_id" required>{% for s in suppliers %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}</select></div>
+      <div class="col-6"><input class="form-control form-control-sm" name="product_name" placeholder="Hàng hóa"></div>
+      <div class="col-6"><input class="form-control form-control-sm" type="number" name="quantity" placeholder="Số lượng"></div>
+      <div class="col-12"><input class="form-control form-control-sm" name="document" placeholder="Minh chứng: hóa đơn, CO, chứng từ…"></div>
+      <div class="col-12"><button class="btn btn-sm btn-leaf" {{ 'disabled' if not suppliers }}>Ghi nhận lô hàng</button></div></form>
+  </div></div>
+</div>
+<div class="panel p-0 mt-4 table-responsive"><table class="table mb-0"><thead><tr><th>Mã lô</th><th>Nhà cung cấp</th><th>Ngày nhập</th><th>SL</th><th>Chứng từ</th><th>Xác minh</th></tr></thead><tbody>
+{% for b in batches %}<tr><td><a href="{{ url_for('shop.trace', code=b.batch_code) }}">{{ b.batch_code }}</a></td><td>{{ b.supplier.name }}</td><td>{{ b.import_date|dt('%d/%m/%Y') }}</td><td>{{ b.quantity }}</td><td>{{ b.document }}</td>
+<td>{% if b.verified %}<span class="badge text-bg-success">Đã xác minh</span>{% else %}<span class="badge text-bg-warning">Chưa xác minh</span>{% endif %}</td></tr>{% else %}<tr><td colspan="6" class="text-muted text-center py-3">Chưa có lô hàng.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

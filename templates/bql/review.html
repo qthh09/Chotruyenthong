@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Hồ sơ {{ s.name }}{% endblock %}
+{% block content %}
+<div class="row g-4"><div class="col-lg-7"><div class="panel">
+  <div class="d-flex justify-content-between"><h1 class="h4">{{ s.name }}</h1>{{ s.status|badge('stall') }}</div>
+  <table class="table"><tr><td>Người bán</td><td>{{ s.owner.full_name }} · {{ s.owner.phone }} · {{ s.owner.email }}</td></tr>
+  <tr><td>Mã số thuế / CCCD</td><td>{{ s.tax_code }}</td></tr><tr><td>Chợ / vị trí</td><td>{{ s.market.name }} – {{ s.address }}</td></tr>
+  <tr><td>Nhóm ngành hàng</td><td>{{ s.category.name }}</td></tr><tr><td>Thời hạn</td><td>{{ s.months }} tháng {% if s.fee %}· Phí {{ s.fee|money }}{% endif %}</td></tr>
+  <tr><td>Giới thiệu</td><td>{{ s.description }}</td></tr>
+  <tr><td>Minh chứng</td><td>{% for d in s.docs.split(',') if d %}<a class="d-block" href="{{ url_for('merchant.doc', name=d) }}" target="_blank">{{ d.split('_',1)[-1] }}</a>{% else %}<span class="text-muted">Chưa có tệp.</span>{% endfor %}</td></tr></table>
+</div></div>
+<div class="col-lg-5"><div class="panel"><h2 class="h6">Xử lý hồ sơ</h2>
+  <form method="post" action="{{ url_for('bql.decide', sid=s.id) }}" class="d-grid gap-2">
+    {% if s.status == 'submitted' %}
+      <button class="btn btn-leaf" name="action" value="pass">Hồ sơ đạt – xác thực & phát sinh phí</button>
+      <textarea class="form-control" name="note" rows="2" placeholder="Nội dung cần bổ sung / lý do từ chối"></textarea>
+      <button class="btn btn-outline-dark" name="action" value="need_more">Yêu cầu bổ sung</button>
+      <button class="btn btn-outline-danger" name="action" value="reject">Từ chối hồ sơ</button>
+    {% elif s.status == 'paid' %}
+      <div class="small text-muted">Đã thanh toán {{ s.fee|money }} lúc {{ s.paid_at|dt }}.</div>
+      <button class="btn btn-leaf" name="action" value="approve">Phê duyệt & kích hoạt gian hàng</button>
+      <button class="btn btn-outline-danger" name="action" value="reject">Từ chối</button>
+    {% else %}<div class="text-muted">Hồ sơ ở trạng thái “{{ s.status|badge('stall') }}” – chưa cần xử lý.</div>{% endif %}
+  </form><a class="btn btn-link px-0 mt-2" href="{{ url_for('bql.dashboard') }}">← Quay lại</a></div></div></div>
+{% endblock %}

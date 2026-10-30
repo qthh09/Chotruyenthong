@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Sản phẩm & kho{% endblock %}
+{% block content %}
+{% include "merchant/_nav.html" %}
+<div class="d-flex justify-content-between mb-3"><h1 class="h4">Sản phẩm, giá và tồn kho</h1><a class="btn btn-leaf" href="{{ url_for('merchant.product_form') }}"><i class="bi bi-plus-lg"></i> Thêm sản phẩm</a></div>
+<div class="panel p-0 table-responsive"><table class="table mb-0"><thead><tr><th></th><th>Sản phẩm</th><th>Lô</th><th style="width:150px">Giá (đ)</th><th style="width:120px">Tồn kho</th><th></th><th></th></tr></thead><tbody>
+{% for p in items %}<tr class="{{ '' if p.is_active else 'text-muted' }}"><td class="fs-4">{{ p.emoji }}</td><td>{{ p.name }}<div class="small text-muted">/{{ p.unit }}{% if not p.is_active %} · đang ẩn{% endif %}</div></td>
+<td class="small">{{ p.batch.batch_code if p.batch else '—' }}</td>
+<td><input form="f{{ p.id }}" class="form-control form-control-sm" type="number" name="price" min="0" value="{{ p.price }}" aria-label="Giá"></td><td><input form="f{{ p.id }}" class="form-control form-control-sm" type="number" name="stock" min="0" value="{{ p.stock }}" aria-label="Tồn kho"></td><td><form id="f{{ p.id }}" method="post" action="{{ url_for('merchant.quick_update', pid=p.id) }}"><button class="btn btn-sm btn-outline-leaf">Lưu</button></form></td>
+<td><a class="btn btn-sm btn-outline-dark" href="{{ url_for('merchant.product_form', pid=p.id) }}">Sửa</a></td></tr>
+{% else %}<tr><td colspan="7" class="text-center text-muted py-4">Chưa có sản phẩm. Hãy thêm sản phẩm đầu tiên.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}
